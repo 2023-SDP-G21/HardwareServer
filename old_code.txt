@@ -1,3 +1,4 @@
+
 import socket
 import threading
 from queue import Queue
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     # Create a socket and listen for connections
     socket = create_socket()
     socket.listen(1)
-    print("Waiting for a connection...")
+    print("Waiting for as connection...")
     connection, client_address = socket.accept()
     print("Connection from", client_address)
 
