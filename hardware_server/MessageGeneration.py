@@ -1,21 +1,23 @@
 import json
 
+
 class MessageGeneration:
+    DATA_CODE = 0
+    WARNING_CODE = 1
 
-    @staticmethod
-    def generate_sensor_data(battery, speed, time_since_start):
-        data_dict = {
-            "battery": battery,
-            "speed": speed,
-            "timeSinceStart": time_since_start
-        }
+    def __init__(self):
+        self.battery = 100
+        self.speed = 0.0
 
-        return json.dumps(data_dict)
+    def generate_sensor_data(self, speed=None, battery=None):
+        json_string = {}
+        if speed or speed != self.speed:
+            json_string["speed"] = self.speed = speed
+        if battery or battery != self.battery:
+            json_string["battery"] = self.battery = battery
 
-    @staticmethod
-    def generate_warning_message(message):
-        warning_dict = {
-            "type": message
-        }
+        return str(self.DATA_CODE) + json.dumps(json_string)
 
-        return json.dumps(warning_dict)
+    def generate_warning_data(self, code):
+        json_string = {"code": code}
+        return str(self.WARNING_CODE) + json.dumps(json_string)
