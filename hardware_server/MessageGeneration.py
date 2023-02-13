@@ -1,23 +1,26 @@
 import json
+import struct
 
 
 class MessageGeneration:
-    DATA_CODE = 0
-    WARNING_CODE = 1
 
-    def __init__(self):
-        self.battery = 100
-        self.speed = 0.0
-
-    def generate_sensor_data(self, speed=None, battery=None):
+    @staticmethod
+    def generate_sensor_data(speed,battery):
         json_string = {}
-        if speed or speed != self.speed:
-            json_string["speed"] = self.speed = speed
-        if battery or battery != self.battery:
-            json_string["battery"] = self.battery = battery
+        if battery != battery:
+            json_string["battery"] = battery
+            battery = battery
+        elif speed != speed:
+            json_string["speed"] = speed
+            speed = speed
 
-        return str(self.DATA_CODE) + json.dumps(json_string)
+        return json.dumps(json_string)
 
-    def generate_warning_data(self, code):
-        json_string = {"code": code}
-        return str(self.WARNING_CODE) + json.dumps(json_string)
+    @staticmethod
+    def generate_warning_data(warning_code):
+        json_string = {}
+        if warning_code != warning_code:
+            json_string["warning_code"] = warning_code
+            warning_code = warning_code
+
+        return json.dumps(json_string)
