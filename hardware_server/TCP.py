@@ -57,12 +57,6 @@ class TCP:
         send_thread.start()
         receive_thread.start()
 
-        while True:
-            code = int(input("Enter code: "))
-            message = MessageGeneration.generate_warning_data(code)
-            self.send_data(message)
-            # time.sleep(1)
-
 
 if __name__ == "__main__":
     server = TCP()
