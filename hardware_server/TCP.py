@@ -4,6 +4,8 @@ from collections import deque
 from queue import Queue
 import threading
 from MessageGeneration import MessageGeneration
+import random
+import time
 
 
 class TCP:
@@ -16,7 +18,6 @@ class TCP:
         self.send_queue = Queue()
         self.receive_queue = deque()
         self.receive_lock = threading.Lock()
-        self.message_gen = MessageGeneration()
 
     def _send_thread(self):
         while True:
@@ -55,6 +56,12 @@ class TCP:
 
         send_thread.start()
         receive_thread.start()
+
+        while True:
+            code = int(input("Enter code: "))
+            message = MessageGeneration.generate_warning_data(code)
+            self.send_data(message)
+            # time.sleep(1)
 
 
 if __name__ == "__main__":
