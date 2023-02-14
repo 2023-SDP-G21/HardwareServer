@@ -30,10 +30,9 @@ class TCP:
             data = self.socket.recv(8)
             if not data:
                 continue
-            speed, power = struct.unpack("!ii", data)
+            angle, power = struct.unpack("!ii", data)
             with self.receive_lock:
-                self.receive_queue.append((speed, power))
-                print(speed, power)
+                self.receive_queue.append((angle, power))
 
     def receive_data(self):
         with self.receive_lock:
