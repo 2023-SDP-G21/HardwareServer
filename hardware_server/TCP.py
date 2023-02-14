@@ -1,11 +1,8 @@
 import socket
 import struct
+import threading
 from collections import deque
 from queue import Queue
-import threading
-from MessageGeneration import MessageGeneration
-import random
-import time
 
 
 class TCP:
@@ -14,6 +11,8 @@ class TCP:
 
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # prevents OSError Address already in use exception
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind((self.IP_ADDRESS, self.PORT))
         self.send_queue = Queue()
         self.receive_queue = deque()
