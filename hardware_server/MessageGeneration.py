@@ -1,5 +1,4 @@
 import json
-import struct
 
 
 class MessageGeneration:
@@ -15,9 +14,9 @@ class MessageGeneration:
             json_string["battery"] = MessageGeneration.battery = battery
         if speed or speed != speed:
             json_string["speed"] = MessageGeneration.speed = speed
-        return str(MessageGeneration.DATA_CODE) + json.dumps(json_string)
+        return MessageGeneration.DATA_CODE, json.dumps(json_string)
 
     @staticmethod
     def generate_warning_data(warning_code):
         json_string = {"code": warning_code}
-        return str(MessageGeneration.WARNING_CODE) + json.dumps(json_string)
+        return MessageGeneration.WARNING_CODE, json.dumps(json_string)

@@ -4,9 +4,13 @@ import threading
 from collections import deque
 from queue import Queue
 
+from hardware_server import Packet
+from Header import Header
+
 
 class TCP:
-    IP_ADDRESS = "172.20.101.231"
+    # IP_ADDRESS = "172.20.101.231"
+    IP_ADDRESS = "localhost"
     PORT = 5000
 
     def __init__(self):
@@ -21,18 +25,24 @@ class TCP:
     def _send_thread(self):
         while True:
             if self.send_queue:
-                data = self.send_queue.get()
-                # first char is converted to 1 byte so that app knows what kind of message that is (0 or 1)
-                self.socket.sendall(data.encode("utf-8"))
+                data_type, data = self.send_queue.get()
+                packet_bytes = Packet.as_bytes(False, False, data_type, data)
+                self.socket.sendall(packet_bytes)
 
     def _receive_thread(self):
         while True:
-            data = self.socket.recv(8)
-            if not data:
+            header_bytes = self.socket.recv(Header.HEADER_LEN)
+            if not header_bytes:
                 continue
-            angle, power = struct.unpack("!ii", data)
+
+            header = Header.from_bytes(header_bytes)
+            data_bytes = self.socket.recv(header.data_len)
+            # TODO: implement dataclass Data to be able to use this:
+            #  data = Data.from_bytes(data_bytes)
+            data = struct.unpack("!ii", data_bytes)
+
             with self.receive_lock:
-                self.receive_queue.append((angle, power))
+                self.receive_queue.append(data)
 
     def receive_data(self):
         with self.receive_lock:
