@@ -9,6 +9,10 @@ from Header import Header
 
 
 class TCP:
+    """
+    TCP communication class
+    """
+
     # IP_ADDRESS = "172.20.101.231"
     IP_ADDRESS = "localhost"
     PORT = 5000
