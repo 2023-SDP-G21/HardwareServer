@@ -1,13 +1,14 @@
-import struct
+import errno
+import socket
 import threading
-from queue import Queue
+import time
 from collections import deque
+from queue import Queue
+from socket import error
 
-import bluetooth
-from bluetooth import BluetoothError
-
-from hardware_server import Packet
-from hardware_server.Header import Header
+from data import *
+from hardware_server import packet
+from header import *
 
 
 class Bluetooth:
@@ -16,6 +17,9 @@ class Bluetooth:
     """
 
     UUID = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
+    MAC_ADDRESS = "B8:27:EB:C4:80:A1"
+    PORT = 1
+    RESTART_TIME = 5
 
     def __init__(self):
         self._connected = True
@@ -31,13 +35,14 @@ class Bluetooth:
         while self._connected:
             if not self.send_queue.empty():
                 data_type, data = self.send_queue.get()
-                packet_bytes = Packet.as_bytes(False, False, data_type, data)
-
+                packet_bytes = packet.as_bytes(False, False, data_type, data)
                 try:
                     socket.send(packet_bytes)
-                except BluetoothError:
-                    self._connected = False
-                    break
+                except error as e:
+                    # if error HAS NOT occurred due to socket being set to nonblocking
+                    if e.args[0] != errno.EWOULDBLOCK:
+                        self._connected = False
+                        break
 
     def _receive_thread(self, socket):
         """
@@ -51,14 +56,21 @@ class Bluetooth:
                     continue
 
                 header = Header.from_bytes(header_bytes)
-            data_bytes = socket.recv(header.data_len)
-            data = struct.unpack("!ii", data_bytes)
+                data_bytes = socket.recv(header.data_len)
+                data = Data.from_bytes(data_bytes)
 
-            with self.receive_lock:
-                self.receive_queue.append(data)
-        except BluetoothError:
-        self._connected = False
-        break
+                if not data:
+                    continue
+
+                print(data)
+
+                with self.receive_lock:
+                    self.receive_queue.append(data)
+            except error as e:
+                # if error HAS NOT occurred due to socket being set to nonblocking
+                if e.args[0] != errno.EWOULDBLOCK:
+                    self._connected = False
+                    break
 
     def receive_data(self):
         """
@@ -81,20 +93,18 @@ class Bluetooth:
         Initialises new Bluetooth socket and accepts connection
         :return:
         """
-        self._sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-        self._sock.bind(("", bluetooth.PORT_ANY))
+        self._sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+        self._sock.bind((self.MAC_ADDRESS, self.PORT))
         self._sock.listen(1)
-        port = self._sock.getsockname()[1]
 
-        bluetooth.advertise_service(self._sock, "SampleServer", service_id=self.UUID,
-                                    service_classes=[self.UUID, bluetooth.SERIAL_PORT_CLASS],
-                                    profiles=[bluetooth.SERIAL_PORT_PROFILE])
-
-        print("Waiting for connection on RFCOMM channel", port)
+        print("Waiting for connection on RFCOMM channel", self.PORT)
         client_sock, client_info = self._sock.accept()
+        client_sock.setblocking(False)
+        print("Connection accepted from MAC", client_info[0])
         self._connected = True
         self.send_queue = Queue()
         self.receive_queue = deque()
+        self.receive_lock = threading.Lock()
         return client_sock
 
     def run(self):
@@ -103,6 +113,8 @@ class Bluetooth:
         :return:
         """
         while True:
+            print("Initializing connection...")
+
             client_sock = self.initialise_connection()
 
             # Attempt sending/receiving
@@ -118,6 +130,9 @@ class Bluetooth:
 
             client_sock.close()
             self._sock.close()
+
+            print(f"Restarting connection in {self.RESTART_TIME} seconds...\n")
+            time.sleep(self.RESTART_TIME)
 
 
 if __name__ == "__main__":

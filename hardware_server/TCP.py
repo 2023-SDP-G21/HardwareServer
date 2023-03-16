@@ -4,8 +4,8 @@ import threading
 from collections import deque
 from queue import Queue
 
-import Packet
-from Header import Header
+from hardware_server import packet
+from header import Header
 
 
 class TCP:
@@ -33,7 +33,7 @@ class TCP:
         while True:
             if self.send_queue:
                 data_type, data = self.send_queue.get()
-                packet_bytes = Packet.as_bytes(False, False, data_type, data)
+                packet_bytes = packet.as_bytes(False, False, data_type, data)
                 self.socket.sendall(packet_bytes)
 
     def _receive_thread(self):
