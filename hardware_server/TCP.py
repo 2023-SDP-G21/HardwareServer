@@ -1,14 +1,10 @@
-"""
-
-"""
-
 import socket
 import struct
 import threading
 from collections import deque
 from queue import Queue
 
-from hardware_server import Packet
+import Packet
 from Header import Header
 
 

@@ -1,0 +1,3 @@
+- remove heartbeat and heartbeat ACK from Header
+- change packet format on android side to only use 
+data length and data
