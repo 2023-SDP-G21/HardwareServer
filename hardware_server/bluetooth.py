@@ -6,9 +6,9 @@ from collections import deque
 from queue import Queue
 from socket import error
 
-from data import *
+from hardware_server.data import *
 from hardware_server import packet
-from header import *
+from hardware_server.header import *
 
 
 class Bluetooth:
@@ -26,6 +26,7 @@ class Bluetooth:
         self.send_queue = Queue()
         self.receive_queue = deque()
         self.receive_lock = threading.Lock()
+        self._sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
 
     def _send_thread(self, socket):
         """
