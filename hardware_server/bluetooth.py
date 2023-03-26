@@ -6,8 +6,8 @@ from collections import deque
 from queue import Queue
 from socket import error
 
-from hardware_server.data import *
 from hardware_server import packet
+from hardware_server.data import *
 from hardware_server.header import *
 
 
@@ -16,9 +16,8 @@ class Bluetooth:
     Establishes a bluetooth connection and sends data
     """
 
-    UUID = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
     MAC_ADDRESS = "B8:27:EB:C4:80:A1"
-    PORT = 1
+    PORT = 5
     RESTART_TIME = 5
 
     def __init__(self):
