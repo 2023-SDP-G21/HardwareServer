@@ -6,9 +6,9 @@ from collections import deque
 from queue import Queue
 from socket import error
 
-from hardware_server import packet
-from hardware_server.data import *
-from hardware_server.header import *
+from .packet import *
+from .data import *
+from .header import *
 
 
 class Bluetooth:
@@ -25,7 +25,8 @@ class Bluetooth:
         self.send_queue = Queue()
         self.receive_queue = deque()
         self.receive_lock = threading.Lock()
-        self._sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+        self._sock = socket.socket(
+            socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
 
     def _send_thread(self, socket):
         """
@@ -35,7 +36,7 @@ class Bluetooth:
         while self._connected:
             if not self.send_queue.empty():
                 data_type, data = self.send_queue.get()
-                packet_bytes = packet.as_bytes(False, False, data_type, data)
+                packet_bytes = as_bytes(False, False, data_type, data)
                 try:
                     socket.send(packet_bytes)
                 except error as e:
@@ -93,7 +94,8 @@ class Bluetooth:
         Initialises new Bluetooth socket and accepts connection
         :return:
         """
-        self._sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+        self._sock = socket.socket(
+            socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
         self._sock.bind((self.MAC_ADDRESS, self.PORT))
         self._sock.listen(1)
 
@@ -118,8 +120,10 @@ class Bluetooth:
             client_sock = self.initialise_connection()
 
             # Attempt sending/receiving
-            send_thread = threading.Thread(target=self._send_thread, args=(client_sock,))
-            receive_thread = threading.Thread(target=self._receive_thread, args=(client_sock,))
+            send_thread = threading.Thread(
+                target=self._send_thread, args=(client_sock,))
+            receive_thread = threading.Thread(
+                target=self._receive_thread, args=(client_sock,))
 
             # Start threads
             send_thread.start()
