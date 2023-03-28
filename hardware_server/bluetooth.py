@@ -16,7 +16,7 @@ class Bluetooth:
     Establishes a bluetooth connection and sends data
     """
 
-    MAC_ADDRESS = "B8:27:EB:C4:80:A1"
+    MAC_ADDRESS = "DC:A6:32:18:06:59"
     PORT = 5
     RESTART_TIME = 5
 
@@ -104,7 +104,6 @@ class Bluetooth:
         client_sock.setblocking(False)
         print("Connection accepted from MAC", client_info[0])
         self._connected = True
-        self.send_queue = Queue()
         self.receive_queue = deque()
         self.receive_lock = threading.Lock()
         return client_sock
