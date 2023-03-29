@@ -1,4 +1,5 @@
 import errno
+import random
 import socket
 import threading
 import time
@@ -6,9 +7,10 @@ from collections import deque
 from queue import Queue
 from socket import error
 
-from .packet import *
-from .data import *
-from .header import *
+from hardware_server.message_generation import MessageGeneration
+from packet import *
+from data import *
+from header import *
 
 
 class Bluetooth:
@@ -16,7 +18,8 @@ class Bluetooth:
     Establishes a bluetooth connection and sends data
     """
 
-    MAC_ADDRESS = "DC:A6:32:18:06:59"
+    # MAC_ADDRESS = "DC:A6:32:18:06:59"
+    MAC_ADDRESS = "90:61:AE:3F:DE:B3"
     PORT = 5
     RESTART_TIME = 5
 
@@ -54,7 +57,9 @@ class Bluetooth:
             try:
                 header_bytes = socket.recv(Header.HEADER_LEN)
                 if not header_bytes:
-                    continue
+                    # If we got here, then the socket is not alive anymore and can disconnect
+                    self._connected = False
+                    break
 
                 header = Header.from_bytes(header_bytes)
                 data_bytes = socket.recv(header.data_len)
@@ -77,7 +82,9 @@ class Bluetooth:
         :return: copy of receive queue
         """
         with self.receive_lock:
-            return self.receive_queue.copy()
+            queue_copy = self.receive_queue.copy()
+            self.receive_queue.clear()
+            return queue_copy
 
     def send_data(self, data):
         """
@@ -106,7 +113,7 @@ class Bluetooth:
         self.receive_queue = deque()
         self.receive_lock = threading.Lock()
         return client_sock
-    
+
     def _run_thread(self):
         """
         Attempts sending/receiving data through the thread. Attempts reconnection upon error
@@ -126,6 +133,12 @@ class Bluetooth:
             # Start threads
             send_thread.start()
             receive_thread.start()
+
+            while self._connected:
+                data = MessageGeneration.generate_sensor_data(random.randint(0, 100), random.randint(0, 100))
+                print(data)
+                self.send_data(data)
+                time.sleep(0.75)
 
             send_thread.join()
             receive_thread.join()
