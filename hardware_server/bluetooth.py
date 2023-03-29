@@ -18,8 +18,8 @@ class Bluetooth:
     Establishes a bluetooth connection and sends data
     """
 
-    # MAC_ADDRESS = "DC:A6:32:18:06:59"
-    MAC_ADDRESS = "90:61:AE:3F:DE:B3"
+    MAC_ADDRESS = "DC:A6:32:18:06:59"
+    # MAC_ADDRESS = "90:61:AE:3F:DE:B3"
     PORT = 5
     RESTART_TIME = 5
 
