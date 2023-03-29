@@ -63,10 +63,8 @@ class Bluetooth:
                 if not data:
                     continue
 
-                print(data)
-
                 with self.receive_lock:
-                    self.receive_queue.append(data)
+                    self.receive_queue.append((data.angle, data.power))
             except error as e:
                 # if error HAS NOT occurred due to socket being set to nonblocking
                 if e.args[0] != errno.EWOULDBLOCK:
@@ -96,6 +94,7 @@ class Bluetooth:
         """
         self._sock = socket.socket(
             socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+        self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._sock.bind((self.MAC_ADDRESS, self.PORT))
         self._sock.listen(1)
 
@@ -107,8 +106,8 @@ class Bluetooth:
         self.receive_queue = deque()
         self.receive_lock = threading.Lock()
         return client_sock
-
-    def run(self):
+    
+    def _run_thread(self):
         """
         Attempts sending/receiving data through the thread. Attempts reconnection upon error
         :return:
@@ -136,6 +135,10 @@ class Bluetooth:
 
             print(f"Restarting connection in {self.RESTART_TIME} seconds...\n")
             time.sleep(self.RESTART_TIME)
+
+    def run(self):
+        run_thread = threading.Thread(target=self._run_thread, args=())
+        run_thread.start()
 
 
 if __name__ == "__main__":

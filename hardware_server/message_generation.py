@@ -4,16 +4,10 @@ import json
 class MessageGeneration:
     DATA_CODE = 0
     WARNING_CODE = 1
-    battery = 100
-    speed = 0.0
 
     @staticmethod
     def generate_sensor_data(speed=None, battery=None):
-        json_string = {}
-        if battery or battery != battery:
-            json_string["battery"] = MessageGeneration.battery = battery
-        if speed or speed != speed:
-            json_string["speed"] = MessageGeneration.speed = speed
+        json_string = {"battery": battery, "speed": speed}
         return MessageGeneration.DATA_CODE, json.dumps(json_string)
 
     @staticmethod
